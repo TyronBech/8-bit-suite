@@ -21,7 +21,11 @@ COLOR_FOOTER        = (120, 130, 140)
 COLOR_RED_ORANGE    = (220,  55,  55)
 COLOR_SELECTED_BG   = (219, 226, 233)
 COLOR_SELECTED_TEXT = ( 67,  70,  75)
+COLOR_LINE          = ( 54,  69,  79)
 COLOR_CYAN          = ( 40, 200, 210)
+COLOR_LIGHT_RED     = (255, 114, 118)
+COLOR_DENIM_BLUE    = ( 21,  96, 189)
+COLOR_SPRING_GREEN  = ( 38, 208, 124)
 
 # --- Menu data ---
 MENU_ITEMS = [
@@ -31,9 +35,9 @@ MENU_ITEMS = [
 ]
 
 ITEM_COLORS = [
-    COLOR_RED_ORANGE,
-    COLOR_CYAN,
-    COLOR_GREEN,
+    COLOR_LIGHT_RED,
+    COLOR_DENIM_BLUE,
+    COLOR_SPRING_GREEN,
 ]
 
 # --- Boot sequence ---
@@ -47,7 +51,7 @@ BOOT_LINES = [
 
 # --- Fonts ---
 def load_fonts():
-    
+
     return {
         "title"  : pygame.font.Font(FONT_PATH, 42),
         "small"  : pygame.font.Font(FONT_PATH, 18),

@@ -5,7 +5,7 @@ from core.settings import (
     COLOR_BG, COLOR_BORDER, COLOR_TITLE_YELLOW, COLOR_GREEN,
     COLOR_TERMINAL, COLOR_ONLINE, COLOR_FOOTER, COLOR_RED_ORANGE,
     COLOR_SELECTED_BG, COLOR_SELECTED_TEXT,
-    MENU_ITEMS, ITEM_COLORS, BOOT_LINES,
+    MENU_ITEMS, ITEM_COLORS, BOOT_LINES, COLOR_LINE,
 )
 
 BOOT_DURATION = len(BOOT_LINES) * 0.4 + 0.4
@@ -52,19 +52,19 @@ def draw_text(surface, fonts, elapsed):
 
     # Terminal prompt top-left
     prompt = fonts["tiny"].render("> root@8bit-suite:~$ ./menu.sh", False, COLOR_TERMINAL)
-    surface.blit(prompt, (28, 28))
+    surface.blit(prompt, (28, 32))
 
     # ONLINE top-right
     online = fonts["tiny"].render("ONLINE", False, COLOR_ONLINE)
-    surface.blit(online, (SCREEN_WIDTH - online.get_width() - 28, 28))
+    surface.blit(online, (SCREEN_WIDTH - online.get_width() - 30, 32))
 
     # Top bar separator
-    pygame.draw.line(surface, (30, 35, 40), (15, 55), (SCREEN_WIDTH - 15, 55), 2)
+    pygame.draw.line(surface, COLOR_LINE, (25, 55), (SCREEN_WIDTH - 28, 55), 2)
 
     # Footer separator
-    pygame.draw.line(surface, (40, 55, 58),
+    pygame.draw.line(surface, COLOR_LINE,
                      (25, SCREEN_HEIGHT - 65),
-                     (SCREEN_WIDTH - 28, SCREEN_HEIGHT - 65), 1)
+                     (SCREEN_WIDTH - 28, SCREEN_HEIGHT - 65), 2)
 
     # Footer labels
     footer_y = SCREEN_HEIGHT - 48
@@ -117,10 +117,10 @@ def draw_boot(surface, fonts, elapsed):
     """Terminal boot sequence — one new line every 0.4s."""
     surface.fill(COLOR_BG)
 
-    lines_to_show = min(int(elapsed / 0.4) + 1, len(BOOT_LINES))
-    x           = 40
-    y           = 80
-    line_height = 36
+    lines_to_show   = min(int(elapsed / 0.4) + 1, len(BOOT_LINES))
+    x               = 40
+    y               = 80
+    line_height     = 36
 
     for i in range(lines_to_show):
         line_surf = fonts["tiny"].render(BOOT_LINES[i], False, COLOR_GREEN)
