@@ -22,8 +22,6 @@ def main():
     manager.register("loading", LoadingScene(manager, fonts))
     manager.register("menu", MenuScene(manager, fonts))
     manager.register("rps", RPSScene(manager, fonts))
-    # We'll add rps, snake, tictactoe later:
-    # manager.register("rps", RPSScene(manager, fonts))
 
     manager.switch_to("menu")
     manager.run()
