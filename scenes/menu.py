@@ -37,9 +37,8 @@ class MenuScene(BaseScene):
         self.selected = 0
         self.elapsed = 0.0
         self.state = "boot"
-        self.loading_label = ""
 
-    def handle_events(self, events):
+    def handle_events(self, events: list[pygame.event.EventType]) -> None:
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if self.state == "menu":
@@ -71,14 +70,14 @@ class MenuScene(BaseScene):
                         self.manager.loading.setup(key, label)
                         self.manager.switch_to("loading")
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         self.elapsed += dt
 
         if self.state == "boot" and self.elapsed >= BOOT_DURATION:
             self.state = "menu"
             self.elapsed = 0.0
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         screen.fill(COLOR_BG)
         if self.state == "boot":
             draw_boot(screen, self.fonts, self.elapsed)
@@ -87,30 +86,31 @@ class MenuScene(BaseScene):
             draw_text(screen, self.fonts, self.elapsed)
             draw_menu(screen, self.fonts, self.selected, self.elapsed)
 
+
 class LoadingScene(BaseScene):
-    def __init__ (self, manager, fonts):
+    def __init__(self, manager, fonts):
         super().__init__(manager)
         self.fonts = fonts
         self.elapsed = 0.0
         self.target = ""
         self.label = ""
 
-    def setup (self, target: str, label: str):
-        """ Prepare the loading screen for a specific target scene. """
+    def setup(self, target: str, label: str) -> None:
+        """Prepare the loading screen for a specific target scene."""
 
         self.target = target
         self.label = label
         self.elapsed = 0.0
 
-    def handle_events (self, events):
+    def handle_events(self, events: list[pygame.event.EventType]) -> None:
         pass
 
-    def update (self, dt):
+    def update(self, dt: float) -> None:
         self.elapsed += dt
         if self.elapsed >= 2.5:
             self.manager.switch_to(self.target)
 
-    def draw (self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         draw_loading(screen, self.fonts, self.label, self.elapsed)
 
 
@@ -153,8 +153,7 @@ def draw_title(surface, fonts):
 
 def draw_text(surface, fonts, elapsed):
     draw_title(surface, fonts)
-    draw_centered_text(surface, "COLLECTION VOL. 1",
-                       fonts["small"], COLOR_GREEN, 175)
+    draw_centered_text(surface, "COLLECTION VOL. 1", fonts["small"], COLOR_GREEN, 175)
 
     # Terminal prompt top-left
     prompt = fonts["tiny"].render(
@@ -258,13 +257,11 @@ def draw_loading(surface, fonts, game_label, elapsed):
     BAR_X = (SCREEN_WIDTH - BAR_W) // 2
     BAR_Y = 310
 
-    pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(
-        BAR_X, BAR_Y, BAR_W, BAR_H), 2)
+    pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(BAR_X, BAR_Y, BAR_W, BAR_H), 2)
 
     fill_w = int(BAR_W * min(elapsed / 2.5, 1.0))
     if fill_w > 0:
-        pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(
-            BAR_X, BAR_Y, fill_w, BAR_H))
+        pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(BAR_X, BAR_Y, fill_w, BAR_H))
 
 
 # ------------------------------------------------------------------ hit test
