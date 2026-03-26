@@ -60,3 +60,29 @@ def load_fonts() -> dict[str, pygame.font.Font]:
         "tiny": pygame.font.Font(FONT_PATH, 12),
         "menu": pygame.font.Font(FONT_PATH, 16),
     }
+
+
+# --- RPS Card Layout ---
+CARD_W = 200
+CARD_H = 200
+CARD_Y = 260
+PLAYER_CARD_X = 180
+CPU_CARD_X = 620
+
+# --- RPS Card Colors ---
+COLOR_CARD_BG = (20, 28, 38)
+COLOR_PLAYER_BORDER = (52, 220, 100)
+COLOR_CPU_BORDER = (60, 130, 220)
+COLOR_CARD_TEXT = (220, 220, 220)
+
+# --- RPS Result Colors ---
+RESULT_COLORS = {
+    "win": (52, 220, 100),
+    "lose": (220, 60, 60),
+    "draw": (180, 180, 180),
+}
+RESULT_LABELS = {
+    "win": "YOU WIN!",
+    "lose": "CPU WINS!",
+    "draw": "DRAW!",
+}
