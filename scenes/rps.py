@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 from core.base_scene import BaseScene
 from core.settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT,
@@ -11,6 +12,18 @@ from core.settings import (
 )
 
 CHOICES = ["ROCK", "PAPER", "SCISSORS"]
+
+def load_rps_images() -> dict:
+    """ Load and return the images used in the RPS scene. """
+
+    names = ["rock", "paper", "scissors"]
+    images = {}
+    for name in names:
+        path = os.path.join("assets", "images", f"{name}.png")
+        img = pygame.image.load(path).convert_alpha()
+        img = pygame.transform.scale(img, (140, 140))
+        images[name] = img
+    return images
 
 
 def get_winner(player: str, cpu: str) -> str:
@@ -26,6 +39,7 @@ class RPSScene(BaseScene):
     def __init__(self, manager, fonts):
         super().__init__(manager)
         self.fonts = fonts
+        self.images = load_rps_images()
         self._reset_round()
         self.player_score = 0
         self.cpu_score = 0
@@ -38,6 +52,8 @@ class RPSScene(BaseScene):
         self.cpu_choice = None
         self.result = None
         self.phase = "choosing"
+        self.reveal_timer = 0.0
+        self.abort_rect = pygame.Rect(28, SCREEN_HEIGHT - 52, 120, 30)
 
     def handle_events(self, events):
         for event in events:
@@ -58,7 +74,8 @@ class RPSScene(BaseScene):
                             self.player_score += 1
                         elif self.result == "lose":
                             self.cpu_score += 1
-                        self.phase = "result"
+                        self.phase = "revealing"
+                        self.reveal_timer = 0.0
                     elif event.key == pygame.K_ESCAPE:
                         self.manager.switch_to("menu")
                 elif self.phase == "result":
@@ -66,9 +83,15 @@ class RPSScene(BaseScene):
                         self._reset_round()
                     elif event.key == pygame.K_ESCAPE:
                         self.manager.switch_to("menu")
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if self.abort_rect.collidepoint(event.pos):
+                    self.manager.switch_to("menu")
 
     def update(self, dt):
-        pass
+        if self.phase == "revealing":
+            self.reveal_timer += dt
+            if self.reveal_timer >= 1.5:
+                self.phase = "result"
 
     def draw(self, screen):
         screen.fill(COLOR_BG)
@@ -87,7 +110,7 @@ class RPSScene(BaseScene):
 
     def _draw_header(self, screen):
         # Terminal prompt style header
-        prompt = self.fonts["small"].render(
+        prompt = self.fonts["tiny"].render(
             "> root@8bit-suite:~$ ./rps.sh", False, COLOR_TERMINAL)
         screen.blit(prompt, (28, 32))
 
@@ -105,41 +128,50 @@ class RPSScene(BaseScene):
         screen.blit(title, ((SCREEN_WIDTH - title.get_width()) // 2, 80))
 
     def _draw_cards(self, screen):
-        # Label above cards
-        for label_text, card_x, in [("PLAYER 1", PLAYER_CARD_X), ("CPU", CPU_CARD_X)]:
-            lbl = self.fonts["smaller"].render(
-                label_text, False, (180, 180, 180))
-            screen.blit(
-                lbl, (card_x + (CARD_W - lbl.get_width()) // 2, CARD_Y - 30))
+        for label_text, card_x in [("PLAYER 1", PLAYER_CARD_X), ("CPU", CPU_CARD_X)]:
+            lbl = self.fonts["smaller"].render(label_text, False, (180, 180, 180))
+            screen.blit(lbl, (card_x + (CARD_W - lbl.get_width()) // 2, CARD_Y - 30))
 
-        # What to show on each card
         if self.phase == "choosing":
             player_text = CHOICES[self.player_index]
             cpu_text = "?"
-        else:
-            player_text = self.player_choice
-            cpu_text = self.cpu_choice
+            self._draw_single_card(screen, player_text, PLAYER_CARD_X, COLOR_PLAYER_BORDER)
+            self._draw_single_card(screen, cpu_text, CPU_CARD_X, COLOR_CPU_BORDER, show_image=False)
 
-        # Draw both cards
-        self._draw_single_card(screen, player_text,
-                               PLAYER_CARD_X, COLOR_PLAYER_BORDER)
-        self._draw_single_card(screen, cpu_text, CPU_CARD_X, COLOR_CPU_BORDER)
+        elif self.phase == "revealing":
+            # Both shown, no overlay yet
+            self._draw_single_card(screen, self.player_choice, PLAYER_CARD_X, COLOR_PLAYER_BORDER)
+            self._draw_single_card(screen, self.cpu_choice, CPU_CARD_X, COLOR_CPU_BORDER)
+
+        elif self.phase == "result":
+            self._draw_single_card(screen, self.player_choice, PLAYER_CARD_X, COLOR_PLAYER_BORDER)
+            self._draw_single_card(screen, self.cpu_choice, CPU_CARD_X, COLOR_CPU_BORDER)
 
         # VS in the middle
         vs = self.fonts["small"].render("VS", False, (200, 60, 60))
-        screen.blit(vs, (SCREEN_WIDTH - vs.get_width() // 2,
-                         CARD_Y + (CARD_H - vs.get_height()) // 2))
+        screen.blit(vs, (
+            (SCREEN_WIDTH - vs.get_width()) // 2,
+            CARD_Y + (CARD_H - vs.get_height()) // 2
+        ))
 
-    def _draw_single_card(self, screen, text, x, border_color):
+    def _draw_single_card(self, screen, text, x, border_color, show_image=True):
         rect = pygame.Rect(x, CARD_Y, CARD_W, CARD_H)
         pygame.draw.rect(screen, COLOR_CARD_BG, rect)
         pygame.draw.rect(screen, border_color, rect, 3)
 
-        label = self.fonts["smaller"].render(text, False, COLOR_CARD_TEXT)
-        screen.blit(label, (
-            x + (CARD_W - label.get_width()) // 2,
-            CARD_Y + (CARD_H - label.get_height()) // 2
-        ))
+        if show_image and text.lower() in self.images:
+            # Draw the pixel art image centered in the card
+            img = self.images[text.lower()]
+            img_x = x + (CARD_W - img.get_width()) // 2
+            img_y = CARD_Y + (CARD_H - img.get_height()) // 2
+            screen.blit(img, (img_x, img_y))
+        else:
+            # Fallback: draw "?" for hidden CPU card
+            label = self.fonts["small"].render(text, False, COLOR_CARD_TEXT)
+            screen.blit(label, (
+                x + (CARD_W - label.get_width()) // 2,
+                CARD_Y + (CARD_H - label.get_height()) // 2
+            ))
 
     def _draw_footer(self, screen):
         pygame.draw.line(
@@ -147,7 +179,11 @@ class RPSScene(BaseScene):
             (25, SCREEN_HEIGHT - 65), (SCREEN_WIDTH - 28, SCREEN_HEIGHT - 65), 2
         )
         footer_y = SCREEN_HEIGHT - 48
-        abort = self.fonts["smaller"].render("< ABORT", False, COLOR_FOOTER)
+
+        mx, my = pygame.mouse.get_pos()
+        abort_color = COLOR_GREEN if self.abort_rect.collidepoint(mx, my) else COLOR_FOOTER
+
+        abort = self.fonts["smaller"].render("< ABORT", False, abort_color)
         score = self.fonts["smaller"].render(
             f"SCORE:  P1 {self.player_score}  -  CPU {self.cpu_score}",
             False, COLOR_FOOTER
