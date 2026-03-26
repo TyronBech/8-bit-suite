@@ -1,4 +1,5 @@
 import pygame
+from core.base_scene import BaseScene
 import math
 from core.settings import (
     SCREEN_WIDTH,
@@ -27,6 +28,90 @@ MENU_BOX_H = 60
 MENU_BOX_X = (SCREEN_WIDTH - MENU_BOX_W) // 2
 MENU_START_Y = 350
 MENU_SPACING = 110
+
+
+class MenuScene(BaseScene):
+    def __init__(self, manager, fonts):
+        super().__init__(manager)
+        self.fonts = fonts
+        self.selected = 0
+        self.elapsed = 0.0
+        self.state = "boot"
+        self.loading_label = ""
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if self.state == "menu":
+                    if event.key == pygame.K_UP:
+                        self.selected = (self.selected - 1) % len(MENU_ITEMS)
+                    elif event.key == pygame.K_DOWN:
+                        self.selected = (self.selected + 1) % len(MENU_ITEMS)
+                    elif event.key == pygame.K_RETURN:
+                        key = MENU_ITEMS[self.selected][1]
+                        label = MENU_ITEMS[self.selected][0]
+                        self.manager.loading.setup(key, label)
+                        self.manager.switch_to("loading")
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+            elif event.type == pygame.MOUSEMOTION and self.state == "menu":
+                mx, my = event.pos
+                for i in range(len(MENU_ITEMS)):
+                    if get_item_rect(i).collidepoint(mx, my):
+                        self.selected = i
+
+            elif event.type == pygame.MOUSEBUTTONUP and self.state == "menu":
+                mx, my = event.pos
+                for i in range(len(MENU_ITEMS)):
+                    if get_item_rect(i).collidepoint(mx, my):
+                        self.selected = i
+                        label = MENU_ITEMS[i][0]
+                        key = MENU_ITEMS[i][1]
+                        self.manager.loading.setup(key, label)
+                        self.manager.switch_to("loading")
+
+    def update(self, dt):
+        self.elapsed += dt
+
+        if self.state == "boot" and self.elapsed >= BOOT_DURATION:
+            self.state = "menu"
+            self.elapsed = 0.0
+
+    def draw(self, screen):
+        screen.fill(COLOR_BG)
+        if self.state == "boot":
+            draw_boot(screen, self.fonts, self.elapsed)
+        else:
+            draw_border(screen)
+            draw_text(screen, self.fonts, self.elapsed)
+            draw_menu(screen, self.fonts, self.selected, self.elapsed)
+
+class LoadingScene(BaseScene):
+    def __init__ (self, manager, fonts):
+        super().__init__(manager)
+        self.fonts = fonts
+        self.elapsed = 0.0
+        self.target = ""
+        self.label = ""
+
+    def setup (self, target: str, label: str):
+        """ Prepare the loading screen for a specific target scene. """
+
+        self.target = target
+        self.label = label
+        self.elapsed = 0.0
+
+    def handle_events (self, events):
+        pass
+
+    def update (self, dt):
+        self.elapsed += dt
+        if self.elapsed >= 2.5:
+            self.manager.switch_to(self.target)
+
+    def draw (self, screen):
+        draw_loading(screen, self.fonts, self.label, self.elapsed)
 
 
 # ------------------------------------------------------------------ helpers
@@ -68,7 +153,8 @@ def draw_title(surface, fonts):
 
 def draw_text(surface, fonts, elapsed):
     draw_title(surface, fonts)
-    draw_centered_text(surface, "COLLECTION VOL. 1", fonts["small"], COLOR_GREEN, 175)
+    draw_centered_text(surface, "COLLECTION VOL. 1",
+                       fonts["small"], COLOR_GREEN, 175)
 
     # Terminal prompt top-left
     prompt = fonts["tiny"].render(
@@ -172,11 +258,13 @@ def draw_loading(surface, fonts, game_label, elapsed):
     BAR_X = (SCREEN_WIDTH - BAR_W) // 2
     BAR_Y = 310
 
-    pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(BAR_X, BAR_Y, BAR_W, BAR_H), 2)
+    pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(
+        BAR_X, BAR_Y, BAR_W, BAR_H), 2)
 
     fill_w = int(BAR_W * min(elapsed / 2.5, 1.0))
     if fill_w > 0:
-        pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(BAR_X, BAR_Y, fill_w, BAR_H))
+        pygame.draw.rect(surface, COLOR_GREEN, pygame.Rect(
+            BAR_X, BAR_Y, fill_w, BAR_H))
 
 
 # ------------------------------------------------------------------ hit test
