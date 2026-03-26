@@ -1,0 +1,184 @@
+import pygame
+import random
+from core.base_scene import BaseScene
+from core.settings import (
+    SCREEN_WIDTH, SCREEN_HEIGHT,
+    COLOR_BG, COLOR_GREEN, COLOR_TITLE_YELLOW,
+    COLOR_FOOTER, COLOR_LINE, COLOR_TERMINAL, COLOR_ONLINE,
+    PLAYER_CARD_X, CPU_CARD_X, CARD_W, CARD_H, CARD_Y,
+    COLOR_PLAYER_BORDER, COLOR_CPU_BORDER, COLOR_CARD_BG, COLOR_CARD_TEXT,
+    RESULT_COLORS, RESULT_LABELS
+)
+
+CHOICES = ["ROCK", "PAPER", "SCISSORS"]
+
+
+def get_winner(player: str, cpu: str) -> str:
+    """ Determine the winner of the round. """
+
+    if player == cpu:
+        return "draw"
+    wins = {("ROCK", "SCISSORS"), ("SCISSORS", "PAPER"), ("PAPER", "ROCK")}
+    return "win" if (player, cpu) in wins else "lose"
+
+
+class RPSScene(BaseScene):
+    def __init__(self, manager, fonts):
+        super().__init__(manager)
+        self.fonts = fonts
+        self._reset_round()
+        self.player_score = 0
+        self.cpu_score = 0
+
+    def _reset_round(self):
+        """ Reset the round state to start a new game. """
+
+        self.player_index = 0
+        self.player_choice = None
+        self.cpu_choice = None
+        self.result = None
+        self.phase = "choosing"
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if self.phase == "choosing":
+                    if event.key == pygame.K_LEFT:
+                        self.player_index = (
+                            self.player_index - 1) % len(CHOICES)
+                    elif event.key == pygame.K_RIGHT:
+                        self.player_index = (
+                            self.player_index + 1) % len(CHOICES)
+                    elif event.key == pygame.K_RETURN:
+                        self.player_choice = CHOICES[self.player_index]
+                        self.cpu_choice = random.choice(CHOICES)
+                        self.result = get_winner(
+                            self.player_choice, self.cpu_choice)
+                        if self.result == "win":
+                            self.player_score += 1
+                        elif self.result == "lose":
+                            self.cpu_score += 1
+                        self.phase = "result"
+                    elif event.key == pygame.K_ESCAPE:
+                        self.manager.switch_to("menu")
+                elif self.phase == "result":
+                    if event.key == pygame.K_RETURN:
+                        self._reset_round()
+                    elif event.key == pygame.K_ESCAPE:
+                        self.manager.switch_to("menu")
+
+    def update(self, dt):
+        pass
+
+    def draw(self, screen):
+        screen.fill(COLOR_BG)
+        self._draw_border(screen)
+        self._draw_header(screen)
+        self._draw_cards(screen)
+        self._draw_footer(screen)
+        if self.phase == "result":
+            self._draw_result_overlay(screen)
+
+    def _draw_border(self, screen):
+        pygame.draw.rect(
+            screen, (160, 170, 175),
+            pygame.Rect(15, 15, SCREEN_WIDTH - 30, SCREEN_HEIGHT - 30), 4
+        )
+
+    def _draw_header(self, screen):
+        # Terminal prompt style header
+        prompt = self.fonts["small"].render(
+            "> root@8bit-suite:~$ ./rps.sh", False, COLOR_TERMINAL)
+        screen.blit(prompt, (28, 32))
+
+        # ONLINE
+        online = self.fonts["tiny"].render("ONLINE", False, COLOR_ONLINE)
+        screen.blit(online, (SCREEN_WIDTH - online.get_width() - 30, 32))
+
+        # Separator line
+        pygame.draw.line(screen, COLOR_LINE, (25, 55),
+                         (SCREEN_WIDTH - 28, 55), 2)
+
+        # Title
+        title = self.fonts["small"].render(
+            "BATTLE IN PROGRESS", False, COLOR_TITLE_YELLOW)
+        screen.blit(title, ((SCREEN_WIDTH - title.get_width()) // 2, 80))
+
+    def _draw_cards(self, screen):
+        # Label above cards
+        for label_text, card_x, in [("PLAYER 1", PLAYER_CARD_X), ("CPU", CPU_CARD_X)]:
+            lbl = self.fonts["smaller"].render(
+                label_text, False, (180, 180, 180))
+            screen.blit(
+                lbl, (card_x + (CARD_W - lbl.get_width()) // 2, CARD_Y - 30))
+
+        # What to show on each card
+        if self.phase == "choosing":
+            player_text = CHOICES[self.player_index]
+            cpu_text = "?"
+        else:
+            player_text = self.player_choice
+            cpu_text = self.cpu_choice
+
+        # Draw both cards
+        self._draw_single_card(screen, player_text,
+                               PLAYER_CARD_X, COLOR_PLAYER_BORDER)
+        self._draw_single_card(screen, cpu_text, CPU_CARD_X, COLOR_CPU_BORDER)
+
+        # VS in the middle
+        vs = self.fonts["small"].render("VS", False, (200, 60, 60))
+        screen.blit(vs, (SCREEN_WIDTH - vs.get_width() // 2,
+                         CARD_Y + (CARD_H - vs.get_height()) // 2))
+
+    def _draw_single_card(self, screen, text, x, border_color):
+        rect = pygame.Rect(x, CARD_Y, CARD_W, CARD_H)
+        pygame.draw.rect(screen, COLOR_CARD_BG, rect)
+        pygame.draw.rect(screen, border_color, rect, 3)
+
+        label = self.fonts["smaller"].render(text, False, COLOR_CARD_TEXT)
+        screen.blit(label, (
+            x + (CARD_W - label.get_width()) // 2,
+            CARD_Y + (CARD_H - label.get_height()) // 2
+        ))
+
+    def _draw_footer(self, screen):
+        pygame.draw.line(
+            screen, COLOR_LINE,
+            (25, SCREEN_HEIGHT - 65), (SCREEN_WIDTH - 28, SCREEN_HEIGHT - 65), 2
+        )
+        footer_y = SCREEN_HEIGHT - 48
+        abort = self.fonts["smaller"].render("< ABORT", False, COLOR_FOOTER)
+        score = self.fonts["smaller"].render(
+            f"SCORE:  P1 {self.player_score}  -  CPU {self.cpu_score}",
+            False, COLOR_FOOTER
+        )
+        screen.blit(abort, (28, footer_y))
+        screen.blit(score, (SCREEN_WIDTH - score.get_width() - 28, footer_y))
+
+
+    def _draw_result_overlay(self, screen):
+        # Dark box
+        overlay = pygame.Surface((500, 200), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 200))
+        ox = (SCREEN_WIDTH - 500) // 2
+        oy = (SCREEN_HEIGHT - 200) // 2
+        screen.blit(overlay, (ox, oy))
+
+        # Result text
+        if self.result is None:
+            return
+        color = RESULT_COLORS[self.result]
+        label = RESULT_LABELS[self.result]
+        result_surf = self.fonts["small"].render(label, False, color)
+        screen.blit(result_surf, (
+            (SCREEN_WIDTH - result_surf.get_width()) // 2, oy + 30
+        ))
+
+        # Play Again button
+        btn_rect = pygame.Rect(ox + 60, oy + 110, 380, 50)
+        pygame.draw.rect(screen, COLOR_TITLE_YELLOW, btn_rect, 3)
+        btn_text = self.fonts["smaller"].render(
+            "PRESS ENTER TO PLAY AGAIN", False, COLOR_TITLE_YELLOW)
+        screen.blit(btn_text, (
+            (SCREEN_WIDTH - btn_text.get_width()) // 2, oy + 125
+        ))
