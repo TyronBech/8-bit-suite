@@ -36,10 +36,9 @@ class MockManager:
 def pygame_init():
     """
     Initialize pygame once for the whole test session.
-    We use pygame.NOFRAME so no visible window ever appears.
+    No pygame.display window is created here to remain safe for headless CI.
     """
     pygame.init()
-    pygame.display.set_mode((1, 1), pygame.NOFRAME)
     yield
     pygame.quit()
 
