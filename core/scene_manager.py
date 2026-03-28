@@ -36,10 +36,12 @@ class SceneManager:
         nor the fallback is available, a ValueError is raised with details.
         """
 
-        if key not in self._scenes:
+        target_scene = self._scenes.get(key)
+        if target_scene is None:
             fallback_key = "menu"
-            if fallback_key in self._scenes:
-                self._current = self._scenes[fallback_key]
+            target_scene = self._scenes.get(fallback_key)
+            if target_scene is not None:
+                self._set_current_scene(target_scene)
                 return
 
             available_scenes = ", ".join(sorted(self._scenes.keys()))
@@ -47,7 +49,19 @@ class SceneManager:
                 f"Scene '{key}' is not registered. Available scenes: {available_scenes}"
             )
 
-        self._current = self._scenes[key]
+        self._set_current_scene(target_scene)
+
+    def _set_current_scene(self, scene: BaseScene) -> None:
+        """Transition between scenes and run lifecycle hooks."""
+
+        if self._current is scene:
+            return
+
+        if self._current is not None:
+            self._current.on_exit()
+
+        self._current = scene
+        self._current.on_enter()
 
     def run(self) -> None:
         """Main game loop - runs until the window is closed."""

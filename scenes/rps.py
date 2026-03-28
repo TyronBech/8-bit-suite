@@ -1,6 +1,7 @@
 import pygame
 import random
 import os
+from typing import Any
 from core.base_scene import BaseScene
 from core.settings import (
     SCREEN_WIDTH,
@@ -52,15 +53,25 @@ def get_winner(player: str, cpu: str) -> str:
 
 
 class RPSScene(BaseScene):
-    def __init__(self, manager, fonts):
+    def __init__(self, manager: Any, fonts: dict[str, pygame.font.Font]) -> None:
         super().__init__(manager)
         self.fonts = fonts
         self.images = load_rps_images()
-        self._reset_round()
+        self._reset_game()
+
+    def on_exit(self) -> None:
+        """Clear the current match so reopening starts fresh."""
+
+        self._reset_game()
+
+    def _reset_game(self) -> None:
+        """Reset the full game state, including scores."""
+
         self.player_score = 0
         self.cpu_score = 0
+        self._reset_round()
 
-    def _reset_round(self):
+    def _reset_round(self) -> None:
         """Reset the round state to start a new game."""
 
         self.player_index = 0
@@ -71,7 +82,7 @@ class RPSScene(BaseScene):
         self.reveal_timer = 0.0
         self.abort_rect = pygame.Rect(28, SCREEN_HEIGHT - 52, 120, 30)
 
-    def handle_events(self, events):
+    def handle_events(self, events: list[pygame.event.EventType]) -> None:
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if self.phase == "choosing":
@@ -100,13 +111,13 @@ class RPSScene(BaseScene):
                 if self.abort_rect.collidepoint(event.pos):
                     self.manager.switch_to("menu")
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         if self.phase == "revealing":
             self.reveal_timer += dt
             if self.reveal_timer >= 1.5:
                 self.phase = "result"
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         screen.fill(COLOR_BG)
         self._draw_border(screen)
         self._draw_header(screen)

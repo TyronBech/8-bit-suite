@@ -10,6 +10,16 @@ class BaseScene:
     def __init__(self, manager):
         self.manager = manager
 
+    def on_enter(self) -> None:
+        """Run setup when the scene becomes active."""
+        # Optional hook: subclasses may override when they need setup logic.
+        pass
+
+    def on_exit(self) -> None:
+        """Run cleanup when the scene is no longer active."""
+        # Optional hook: subclasses may override when they need cleanup logic.
+        pass
+
     def handle_events(self, events: list[pygame.event.EventType]) -> None:
         """Handle keyboard and mouse input."""
         raise NotImplementedError(
