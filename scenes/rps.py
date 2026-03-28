@@ -56,9 +56,19 @@ class RPSScene(BaseScene):
         super().__init__(manager)
         self.fonts = fonts
         self.images = load_rps_images()
-        self._reset_round()
+        self._reset_game()
+
+    def on_exit(self) -> None:
+        """Clear the current match so reopening starts fresh."""
+
+        self._reset_game()
+
+    def _reset_game(self):
+        """Reset the full game state, including scores."""
+
         self.player_score = 0
         self.cpu_score = 0
+        self._reset_round()
 
     def _reset_round(self):
         """Reset the round state to start a new game."""
