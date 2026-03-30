@@ -23,6 +23,7 @@ from core.settings import (
     COLOR_CPU_BORDER,
     COLOR_CARD_BG,
     COLOR_CARD_TEXT,
+    COLOR_RED_ORANGE,
     RESULT_COLORS,
     RESULT_LABELS,
 )
@@ -81,6 +82,7 @@ class RPSScene(BaseScene):
         self.phase = "choosing"
         self.reveal_timer = 0.0
         self.abort_rect = pygame.Rect(28, SCREEN_HEIGHT - 52, 120, 30)
+        self.reset_btn_rect = None
 
     def handle_events(self, events: list[pygame.event.EventType]) -> None:
         for event in events:
@@ -110,6 +112,8 @@ class RPSScene(BaseScene):
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.abort_rect.collidepoint(event.pos):
                     self.manager.switch_to("menu")
+                if self.reset_btn_rect and self.reset_btn_rect.collidepoint(event.pos):
+                    self._reset_round()
 
     def update(self, dt: float) -> None:
         if self.phase == "revealing":
@@ -261,9 +265,11 @@ class RPSScene(BaseScene):
         )
 
         # Play Again button
-        btn_rect = pygame.Rect(ox + 60, oy + 110, 380, 50)
-        pygame.draw.rect(screen, COLOR_TITLE_YELLOW, btn_rect, 3)
+        self.reset_btn_rect = pygame.Rect(ox + 60, oy + 110, 380, 50)
+        mx, my = pygame.mouse.get_pos()
+
+        pygame.draw.rect(screen, COLOR_RED_ORANGE if self.reset_btn_rect.collidepoint(mx, my) else COLOR_TITLE_YELLOW, self.reset_btn_rect, 3)
         btn_text = self.fonts["smaller"].render(
-            "PRESS ENTER TO PLAY AGAIN", False, COLOR_TITLE_YELLOW
+            "PRESS ENTER TO PLAY AGAIN", False, COLOR_RED_ORANGE if self.reset_btn_rect.collidepoint(mx, my) else COLOR_TITLE_YELLOW
         )
         screen.blit(btn_text, ((SCREEN_WIDTH - btn_text.get_width()) // 2, oy + 125))
