@@ -268,8 +268,8 @@ class RPSScene(BaseScene):
         self.reset_btn_rect = pygame.Rect(ox + 60, oy + 110, 380, 50)
         mx, my = pygame.mouse.get_pos()
 
-        pygame.draw.rect(screen, COLOR_RED_ORANGE if self.reset_btn_rect.collidepoint(mx, my) else COLOR_TITLE_YELLOW, self.reset_btn_rect, 3)
+        pygame.draw.rect(screen, COLOR_TERMINAL if self.reset_btn_rect.collidepoint(mx, my) else COLOR_TITLE_YELLOW, self.reset_btn_rect, 3)
         btn_text = self.fonts["smaller"].render(
-            "PRESS ENTER TO PLAY AGAIN", False, COLOR_RED_ORANGE if self.reset_btn_rect.collidepoint(mx, my) else COLOR_TITLE_YELLOW
+            "PRESS ENTER TO PLAY AGAIN", False, COLOR_TERMINAL if self.reset_btn_rect.collidepoint(mx, my) else COLOR_TITLE_YELLOW
         )
         screen.blit(btn_text, ((SCREEN_WIDTH - btn_text.get_width()) // 2, oy + 125))
