@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-import random
 from typing import Any
 from core.base_scene import BaseScene
 from core.settings import (
@@ -27,7 +26,7 @@ def check_winner(board: np.ndarray) -> str | None:
 
     Args:
         board (np.ndarray): flat numpy array of 9 int8 values.
-            1 = X (player), -1 = 0 (CPU), 0 = empty.
+            1 = X (player), -1 = O (CPU), 0 = empty.
 
     Returns:
         "X"     - player wins
@@ -248,7 +247,7 @@ class TicTacToeScene(BaseScene):
             title_color = RESULT_COLORS.get(self.winner or "", COLOR_TITLE_YELLOW)
 
         title = self.fonts["small"].render(turn_text, False, title_color)
-        screen.blit(title, (SCREEN_WIDTH - title.get_width() // 2, 80))
+        screen.blit(title, ((SCREEN_WIDTH - title.get_width()) // 2, 80))
 
     def _draw_board(self, screen: pygame.Surface) -> None:
         # --- grid lines ---

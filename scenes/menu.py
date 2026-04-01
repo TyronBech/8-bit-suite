@@ -1,4 +1,5 @@
 import pygame
+from typing import Any
 from core.base_scene import BaseScene
 import math
 from core.settings import (
@@ -31,7 +32,7 @@ MENU_SPACING = 110
 
 
 class MenuScene(BaseScene):
-    def __init__(self, manager, fonts):
+    def __init__(self, manager: Any, fonts: dict[str, pygame.font.Font]) -> None:
         super().__init__(manager)
         self.fonts = fonts
         self.selected = 0
@@ -88,7 +89,7 @@ class MenuScene(BaseScene):
 
 
 class LoadingScene(BaseScene):
-    def __init__(self, manager, fonts):
+    def __init__(self, manager: Any, fonts: dict[str, pygame.font.Font]) -> None:
         super().__init__(manager)
         self.fonts = fonts
         self.elapsed = 0.0
@@ -117,7 +118,13 @@ class LoadingScene(BaseScene):
 # ------------------------------------------------------------------ helpers
 
 
-def draw_centered_text(surface, text, font, color, y):
+def draw_centered_text(
+    surface: pygame.Surface,
+    text: str,
+    font: pygame.font.Font,
+    color: tuple[int, int, int],
+    y: int,
+) -> None:
     """Draw text horizontally centered at y."""
     text_surf = font.render(text, False, color)
     x = (SCREEN_WIDTH - text_surf.get_width()) // 2
@@ -267,7 +274,7 @@ def draw_loading(surface, fonts, game_label, elapsed):
 # ------------------------------------------------------------------ hit test
 
 
-def get_item_rect(i):
+def get_item_rect(i: int) -> pygame.Rect:
     """Return the clickable Rect for menu item at index i."""
     cy = MENU_START_Y + i * MENU_SPACING
     return pygame.Rect(MENU_BOX_X, cy - MENU_BOX_H // 2, MENU_BOX_W, MENU_BOX_H)

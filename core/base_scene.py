@@ -1,4 +1,5 @@
 import pygame
+from typing import Any
 
 
 class BaseScene:
@@ -7,7 +8,7 @@ class BaseScene:
     The SceneManager calls these three methods every frame.
     """
 
-    def __init__(self, manager):
+    def __init__(self, manager: Any) -> None:
         self.manager = manager
 
     def on_enter(self) -> None:

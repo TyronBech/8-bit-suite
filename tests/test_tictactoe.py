@@ -17,7 +17,7 @@ from scenes.tictactoe import (
     check_winner,
     minimax,
     get_cpu_move,
-    #TicTacToeScene,
+    TicTacToeScene,
 )
 
 
@@ -52,9 +52,9 @@ def fonts():
     return {k: font for k in ("title", "small", "smaller", "tiny", "menu")}
 
 
-# @pytest.fixture
-# def scene(manager, fonts):
-#     return TicTacToeScene(manager, fonts)
+@pytest.fixture
+def scene(manager, fonts):
+    return TicTacToeScene(manager, fonts)
 
 
 def board(*values) -> np.ndarray:
@@ -118,7 +118,7 @@ class TestGetCpuMove:
         assert get_cpu_move(b) == 4
 
     def test_cpu_takes_winning_move(self):
-        # O can win at index 2
+        # O can win at index 8
         b = board(0, 0, 0, 1, 1, 0, -1, -1, 0)
         assert get_cpu_move(b) == 8   # completes O's bottom row (-1,-1,_)
 

@@ -18,21 +18,20 @@ A classic arcade-style game collection built with Python. This suite features a 
 1. Clone or download the repository to your local machine.
 2. Ensure you have Python installed.
 3. Install the required dependencies:
-`bash
+```bash
 pip install -r requirements.txt
-`
+```
 
 ## Usage
 
 Start the game suite by running the main entry point:
-`bash
+```bash
 python main.py
-`
+```
 
 ## Project Structure
-- assets/: Contains custom 8-bit fonts and sound effects.
-- core/: Base engine logic (\base_scene.py\, \scene_manager.py\, \settings.py\).
-- scenes/: Individual game implementations (\menu.py\, \snake.py\, \	ictactoe.py\, \
-ps.py\).
-- 	ests/: Automated test suite.
+- `assets/`: Contains custom 8-bit fonts and sound effects.
+- `core/`: Base engine logic (`base_scene.py`, `scene_manager.py`, `settings.py`).
+- `scenes/`: Individual game implementations (`menu.py`, `snake.py`, `tictactoe.py`, `rps.py`).
+- `tests/`: Automated test suite.
 
