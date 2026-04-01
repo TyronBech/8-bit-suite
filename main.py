@@ -3,6 +3,7 @@ from core.settings import SCREEN_WIDTH, SCREEN_HEIGHT, TITLE, load_fonts
 from core.scene_manager import SceneManager
 from scenes.menu import MenuScene, LoadingScene
 from scenes.rps import RPSScene
+from scenes.tictactoe import TicTacToeScene
 
 
 def main():
@@ -22,6 +23,7 @@ def main():
     manager.register("loading", LoadingScene(manager, fonts))
     manager.register("menu", MenuScene(manager, fonts))
     manager.register("rps", RPSScene(manager, fonts))
+    manager.register("tictactoe", TicTacToeScene(manager, fonts))
 
     manager.switch_to("menu")
     manager.run()

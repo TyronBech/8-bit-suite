@@ -86,3 +86,15 @@ RESULT_LABELS = {
     "lose": "CPU WINS!",
     "draw": "DRAW!",
 }
+
+# --- TTT Board Layout ---
+TTT_CELL_SIZE = 160
+TTT_BOARD_W = TTT_CELL_SIZE * 3
+TTT_BOARD_H = TTT_CELL_SIZE * 3
+TTT_BOARD_X = (SCREEN_WIDTH - TTT_BOARD_W) // 2
+TTT_BOARD_Y = 140
+
+# --- TTT Colors ---
+COLOR_TTT_LINE = (60, 80, 100)
+COLOR_TTT_X = (220, 60, 60)
+COLOR_TTT_O = (40, 180, 220)
