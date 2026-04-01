@@ -20,6 +20,7 @@ class SceneManager:
         self.fonts = fonts
         self._scenes: dict[str, BaseScene] = {}
         self._current: BaseScene | None = None
+        self.loading: BaseScene | None = None
 
     def register(self, key: str, scene: BaseScene) -> None:
         """Register a scene by key name."""
