@@ -49,8 +49,8 @@ def minimax(board: np.ndarray, is_maximizing: bool) -> int:
     """
     Minimax algorithm - CPU always plays optimally
 
-    CPU is 0 (-1) = maximizer (wants to highest score)
-    Player is X (1) = minimizer (wants to lowest score)
+    CPU is 0 (1) = maximizer (wants to highest score)
+    Player is X (-1) = minimizer (wants to lowest score)
 
     Returns:
         1   - CPU wins from this position
@@ -141,9 +141,11 @@ class TicTacToeScene(BaseScene):
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.abort_rect.collidepoint(event.pos):
                     self.manager.switch_to("menu")
+                    continue
 
                 if self.reset_btn_rect and self.reset_btn_rect.collidepoint(event.pos):
                     self._reset_round()
+                    continue
 
                 if self.phase == "playing" and self.current_turn == "X":
                     cell = self._get_cell_from_mouse(*event.pos)
@@ -300,14 +302,14 @@ class TicTacToeScene(BaseScene):
 
         abort = self.fonts["smaller"].render("< ABORT", False, abort_color)
         score = self.fonts["smaller"].render(
-            f"SCORE:  P1 {self.player_score}  -  CPU {self.cpu_score}",
+            f"SCORE:  P1 {self.player_score} - CPU {self.cpu_score}",
             False, COLOR_FOOTER,
         )
-        hint = self.fonts["smaller"].render("CLICK TO PLACE   |   R TO RESET", False, COLOR_FOOTER)
+        hint = self.fonts["smaller"].render("CLICK TO PLACE  |  R TO RESET", False, COLOR_FOOTER)
 
         screen.blit(abort, (28, footer_y))
         screen.blit(score, (SCREEN_WIDTH - score.get_width() - 28, footer_y))
-        screen.blit(hint, ((SCREEN_WIDTH - hint.get_width()) // 2, footer_y))
+        screen.blit(hint, (((SCREEN_WIDTH - hint.get_width()) // 2) - 88, footer_y))
 
     def _draw_result_overlay(self, screen: pygame.Surface) -> None:
         if self.winner is None:
