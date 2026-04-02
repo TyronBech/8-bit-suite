@@ -49,8 +49,8 @@ def minimax(board: np.ndarray, is_maximizing: bool) -> int:
     """
     Minimax algorithm - CPU always plays optimally
 
-    CPU is 0 (-1) = maximizer (wants to highest score)
-    Player is X (1) = minimizer (wants to lowest score)
+    CPU is O (-1) = maximizer (wants the highest score)
+    Player is X (1) = minimizer (wants the lowest score)
 
     Returns:
         1   - CPU wins from this position
@@ -76,21 +76,33 @@ def minimax(board: np.ndarray, is_maximizing: bool) -> int:
 
     return max(scores) if is_maximizing else min(scores)
 
-def get_cpu_move(board: np.ndarray) -> int:
+def get_cpu_move(board: np.ndarray, difficulty: float = 0.6) -> int:
     """
-    Return the index of the best move for the CPU using minimax algorithm.
+    Return the index of a move for the CPU.
+    Uses minimax, but occasionally makes a random move to allow the player to win.
 
     Args:
         board (np.ndarray): flat numpy array of 9 int8 values.
+        difficulty (float): 0.0 to 1.0.
+                            1.0 = unbeatable (100% Minimax).
+                            0.6 = 60% chance for perfect play, 40% chance for a random move.
 
     Returns:
-        Index 0-8 of the best empty cell for the CPU to play.
+        Index 0-8 of the empty cell for the CPU to play.
     """
+    empty_cells = np.where(board == 0)[0]
+
+    # --- THE NERF ---
+    # Generate a random number between 0.0 and 1.0.
+    # If it's greater than our difficulty threshold, the CPU makes a random move.
+    if np.random.random() > difficulty:
+        return int(np.random.choice(empty_cells))
+    # ----------------
 
     best_score = -2
     best_index = -1
 
-    for i in np.where(board == 0)[0]:
+    for i in empty_cells:
         board[i] = -1
         score = minimax(board, False)
         board[i] = 0
@@ -141,9 +153,11 @@ class TicTacToeScene(BaseScene):
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.abort_rect.collidepoint(event.pos):
                     self.manager.switch_to("menu")
+                    continue
 
                 if self.reset_btn_rect and self.reset_btn_rect.collidepoint(event.pos):
                     self._reset_round()
+                    continue
 
                 if self.phase == "playing" and self.current_turn == "X":
                     cell = self._get_cell_from_mouse(*event.pos)
@@ -300,14 +314,17 @@ class TicTacToeScene(BaseScene):
 
         abort = self.fonts["smaller"].render("< ABORT", False, abort_color)
         score = self.fonts["smaller"].render(
-            f"SCORE:  P1 {self.player_score}  -  CPU {self.cpu_score}",
+            f"SCORE:  P1 {self.player_score} - CPU {self.cpu_score}",
             False, COLOR_FOOTER,
         )
-        hint = self.fonts["smaller"].render("CLICK TO PLACE   |   R TO RESET", False, COLOR_FOOTER)
+        hint = self.fonts["smaller"].render("CLICK TO PLACE  |  R TO RESET", False, COLOR_FOOTER)
 
         screen.blit(abort, (28, footer_y))
         screen.blit(score, (SCREEN_WIDTH - score.get_width() - 28, footer_y))
-        screen.blit(hint, ((SCREEN_WIDTH - hint.get_width()) // 2, footer_y))
+        abort_right = 28 + abort.get_width()
+        score_left = SCREEN_WIDTH - score.get_width() - 28
+        hint_x = (abort_right + score_left - hint.get_width()) // 2
+        screen.blit(hint, (hint_x, footer_y))
 
     def _draw_result_overlay(self, screen: pygame.Surface) -> None:
         if self.winner is None:
