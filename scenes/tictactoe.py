@@ -76,21 +76,33 @@ def minimax(board: np.ndarray, is_maximizing: bool) -> int:
 
     return max(scores) if is_maximizing else min(scores)
 
-def get_cpu_move(board: np.ndarray) -> int:
+def get_cpu_move(board: np.ndarray, difficulty: float = 0.6) -> int:
     """
-    Return the index of the best move for the CPU using minimax algorithm.
+    Return the index of a move for the CPU.
+    Uses minimax, but occasionally makes a random move to allow the player to win.
 
     Args:
         board (np.ndarray): flat numpy array of 9 int8 values.
+        difficulty (float): 0.0 to 1.0.
+                            1.0 = unbeatable (100% Minimax).
+                            0.6 = 60% chance for perfect play, 40% chance for a random move.
 
     Returns:
-        Index 0-8 of the best empty cell for the CPU to play.
+        Index 0-8 of the empty cell for the CPU to play.
     """
+    empty_cells = np.where(board == 0)[0]
+
+    # --- THE NERF ---
+    # Generate a random number between 0.0 and 1.0.
+    # If it's greater than our difficulty threshold, the CPU makes a random move.
+    if np.random.random() > difficulty:
+        return int(np.random.choice(empty_cells))
+    # ----------------
 
     best_score = -2
     best_index = -1
 
-    for i in np.where(board == 0)[0]:
+    for i in empty_cells:
         board[i] = -1
         score = minimax(board, False)
         board[i] = 0
