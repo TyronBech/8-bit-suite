@@ -49,8 +49,8 @@ def minimax(board: np.ndarray, is_maximizing: bool) -> int:
     """
     Minimax algorithm - CPU always plays optimally
 
-    CPU is 0 (1) = maximizer (wants to highest score)
-    Player is X (-1) = minimizer (wants to lowest score)
+    CPU is O (-1) = maximizer (wants the highest score)
+    Player is X (1) = minimizer (wants the lowest score)
 
     Returns:
         1   - CPU wins from this position
@@ -76,20 +76,21 @@ def minimax(board: np.ndarray, is_maximizing: bool) -> int:
 
     return max(scores) if is_maximizing else min(scores)
 
-def get_cpu_move(board: np.ndarray, difficulty: float = 0.6) -> int:
+def get_cpu_move(board: np.ndarray, difficulty: float = 1.0) -> int:
     """
     Return the index of a move for the CPU.
     Uses minimax, but occasionally makes a random move to allow the player to win.
 
     Args:
         board (np.ndarray): flat numpy array of 9 int8 values.
-        difficulty (float): 0.0 to 1.0.
+        difficulty (float): 0.0 to 1.0. Values are clamped to this range.
                             1.0 = unbeatable (100% Minimax).
-                            0.6 = 60% chance for perfect play, 40% chance for a random move.
+                            0.5 = 50% chance for perfect play, 50% chance for a random move.
 
     Returns:
         Index 0-8 of the empty cell for the CPU to play.
     """
+    difficulty = max(0.0, min(1.0, difficulty))
     empty_cells = np.where(board == 0)[0]
 
     # --- THE NERF ---
@@ -321,7 +322,10 @@ class TicTacToeScene(BaseScene):
 
         screen.blit(abort, (28, footer_y))
         screen.blit(score, (SCREEN_WIDTH - score.get_width() - 28, footer_y))
-        screen.blit(hint, (((SCREEN_WIDTH - hint.get_width()) // 2) - 88, footer_y))
+        abort_right = 28 + abort.get_width()
+        score_left = SCREEN_WIDTH - score.get_width() - 28
+        hint_x = (abort_right + score_left - hint.get_width()) // 2
+        screen.blit(hint, (hint_x, footer_y))
 
     def _draw_result_overlay(self, screen: pygame.Surface) -> None:
         if self.winner is None:
