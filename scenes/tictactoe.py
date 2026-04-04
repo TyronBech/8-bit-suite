@@ -69,6 +69,20 @@ def load_ttt_images() -> dict[int, pygame.Surface]:
     return marker_images
 
 
+
+def load_ttt_images() -> dict[int, pygame.Surface]:
+    """Load and scale the custom X/O marker art for the board."""
+    marker_size = TTT_CELL_SIZE - 24
+    image_paths = {
+        1: os.path.join("assets", "images", "X.png"),
+        -1: os.path.join("assets", "images", "O.png"),
+    }
+    marker_images = {}
+    for value, path in image_paths.items():
+        image = pygame.image.load(path).convert_alpha()
+        marker_images[value] = pygame.transform.scale(image, (marker_size, marker_size))
+    return marker_images
+
 def check_winner(board: np.ndarray) -> str | None:
     """
     Check if there's a winner or draw in the board.
