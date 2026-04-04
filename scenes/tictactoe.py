@@ -1,3 +1,4 @@
+import os
 import pygame
 import numpy as np
 from typing import Any
@@ -19,6 +20,20 @@ WINNING_LINES = np.array([
     [0, 3, 6], [1, 4, 7], [2, 5, 8],    # columns
     [0, 4, 8], [2, 4, 6],               # diagonals
 ])
+
+
+def load_ttt_images() -> dict[int, pygame.Surface]:
+    """Load and scale the custom X/O marker art for the board."""
+    marker_size = TTT_CELL_SIZE - 24
+    image_paths = {
+        1: os.path.join("assets", "images", "X.png"),
+        -1: os.path.join("assets", "images", "O.png"),
+    }
+    marker_images = {}
+    for value, path in image_paths.items():
+        image = pygame.image.load(path).convert_alpha()
+        marker_images[value] = pygame.transform.scale(image, (marker_size, marker_size))
+    return marker_images
 
 def check_winner(board: np.ndarray) -> str | None:
     """
@@ -118,6 +133,7 @@ class TicTacToeScene(BaseScene):
     def __init__(self, manager: Any, fonts: dict[str, pygame.font.Font]) -> None:
         super().__init__(manager)
         self.fonts = fonts
+        self.marker_images = load_ttt_images()
         self._reset_game()
 
     def on_exit(self) -> None:
@@ -235,6 +251,14 @@ class TicTacToeScene(BaseScene):
         cy = TTT_BOARD_Y + row * TTT_CELL_SIZE + TTT_CELL_SIZE // 2
         return cx, cy
 
+    def _draw_marker_image(
+        self, screen: pygame.Surface, center: tuple[int, int], value: int
+    ) -> None:
+        """Draw the custom marker art centered inside a cell."""
+        image = self.marker_images[value]
+        rect = image.get_rect(center=center)
+        screen.blit(image, rect)
+
     # --------------------------------------------------------------- drawing methods
 
     def _draw_border(self, screen: pygame.Surface) -> None:
@@ -280,22 +304,11 @@ class TicTacToeScene(BaseScene):
             )
 
         # --- X and O markers ---
-        pad = 40
-        radius = TTT_CELL_SIZE // 2 - pad
-
         for i in range(9):
             if self.board[i] == 0:
                 continue
             cx, cy = self._cell_center(i)
-            if self.board[i] == 1:
-                pygame.draw.line(screen, COLOR_TTT_X,
-                                 (cx - radius, cy - radius),
-                                 (cx + radius, cy + radius), 6)
-                pygame.draw.line(screen, COLOR_TTT_X,
-                                 (cx + radius, cy - radius),
-                                 (cx - radius, cy + radius), 6)
-            else:
-                pygame.draw.circle(screen, COLOR_TTT_O, (cx, cy), radius, 6)
+            self._draw_marker_image(screen, (cx, cy), int(self.board[i]))
 
         if self.winning_line:
             start = self._cell_center(self.winning_line[0])
