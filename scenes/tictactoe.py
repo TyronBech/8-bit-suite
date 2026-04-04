@@ -4,22 +4,41 @@ import numpy as np
 from typing import Any
 from core.base_scene import BaseScene
 from core.settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT,
-    COLOR_BG, COLOR_BORDER, COLOR_LINE,
-    COLOR_TERMINAL, COLOR_ONLINE,
-    COLOR_FOOTER, COLOR_TITLE_YELLOW,
-    COLOR_GREEN, COLOR_RED_ORANGE,
-    RESULT_COLORS, RESULT_LABELS,
-    TTT_CELL_SIZE, TTT_BOARD_W, TTT_BOARD_H,
-    TTT_BOARD_X, TTT_BOARD_Y,
-    COLOR_TTT_LINE, COLOR_TTT_X, COLOR_TTT_O,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    COLOR_BG,
+    COLOR_BORDER,
+    COLOR_LINE,
+    COLOR_TERMINAL,
+    COLOR_ONLINE,
+    COLOR_FOOTER,
+    COLOR_TITLE_YELLOW,
+    COLOR_GREEN,
+    COLOR_RED_ORANGE,
+    RESULT_COLORS,
+    RESULT_LABELS,
+    TTT_CELL_SIZE,
+    TTT_BOARD_W,
+    TTT_BOARD_H,
+    TTT_BOARD_X,
+    TTT_BOARD_Y,
+    COLOR_TTT_LINE,
+    COLOR_TTT_X,
+    COLOR_TTT_O,
 )
 
-WINNING_LINES = np.array([
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],    # rows
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],    # columns
-    [0, 4, 8], [2, 4, 6],               # diagonals
-])
+WINNING_LINES = np.array(
+    [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],  # rows
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],  # columns
+        [0, 4, 8],
+        [2, 4, 6],  # diagonals
+    ]
+)
 
 
 def load_ttt_images() -> dict[int, pygame.Surface]:
@@ -29,11 +48,20 @@ def load_ttt_images() -> dict[int, pygame.Surface]:
         1: os.path.join("assets", "images", "X.png"),
         -1: os.path.join("assets", "images", "O.png"),
     }
-    marker_images = {}
+    marker_images: dict[int, pygame.Surface] = {}
+    display_surface = pygame.display.get_surface()
+
     for value, path in image_paths.items():
-        image = pygame.image.load(path).convert_alpha()
+        try:
+            image = pygame.image.load(path)
+            if display_surface is not None:
+                image = image.convert_alpha()
+        except (pygame.error, FileNotFoundError):
+            image = pygame.Surface((marker_size, marker_size), pygame.SRCALPHA)
+
         marker_images[value] = pygame.transform.scale(image, (marker_size, marker_size))
     return marker_images
+
 
 def check_winner(board: np.ndarray) -> str | None:
     """
@@ -59,6 +87,7 @@ def check_winner(board: np.ndarray) -> str | None:
     if np.all(board != 0):
         return "draw"
     return None
+
 
 def minimax(board: np.ndarray, is_maximizing: bool) -> int:
     """
@@ -90,6 +119,7 @@ def minimax(board: np.ndarray, is_maximizing: bool) -> int:
         board[i] = 0
 
     return max(scores) if is_maximizing else min(scores)
+
 
 def get_cpu_move(board: np.ndarray, difficulty: float = 0.6) -> int:
     """
@@ -127,6 +157,7 @@ def get_cpu_move(board: np.ndarray, difficulty: float = 0.6) -> int:
 
     return int(best_index)
 
+
 class TicTacToeScene(BaseScene):
     """Tic Tac Toe game scene. Player is X, CPU is O."""
 
@@ -137,17 +168,17 @@ class TicTacToeScene(BaseScene):
         self._reset_game()
 
     def on_exit(self) -> None:
-        """ Clear all state when exiting the scene. """
+        """Clear all state when exiting the scene."""
         self._reset_game()
 
     def _reset_game(self) -> None:
-        """ Reset scores and the board. """
+        """Reset scores and the board."""
         self.player_score = 0
         self.cpu_score = 0
         self._reset_round()
 
     def _reset_round(self) -> None:
-        """ Start new round with an empty board. """
+        """Start new round with an empty board."""
         self.board = np.zeros(9, dtype=np.int8)
         self.current_turn = "X"  # Player starts first
         self.winner: str | None = None
@@ -181,7 +212,7 @@ class TicTacToeScene(BaseScene):
                         self._place_move(cell, 1)
 
     def update(self, dt: float) -> None:
-        """ Advance game state. CPU moves after a short delay. """
+        """Advance game state. CPU moves after a short delay."""
         if self.phase != "playing" or self.current_turn != "O":
             return
 
@@ -228,7 +259,7 @@ class TicTacToeScene(BaseScene):
             self.cpu_timer = 0.0
 
     def _find_winning_line(self) -> list[int] | None:
-        """ Return the list of 3 cell indices that form the winning line, or None if no winner. """
+        """Return the list of 3 cell indices that form the winning line, or None if no winner."""
         for line in WINNING_LINES:
             total = self.board[line].sum()
             if total == 3 or total == -3:
@@ -245,7 +276,7 @@ class TicTacToeScene(BaseScene):
         return None
 
     def _cell_center(self, cell: int) -> tuple[int, int]:
-        """ Return the pixel coordinates of the center of a given cell index. """
+        """Return the pixel coordinates of the center of a given cell index."""
         row, col = divmod(cell, 3)
         cx = TTT_BOARD_X + col * TTT_CELL_SIZE + TTT_CELL_SIZE // 2
         cy = TTT_BOARD_Y + row * TTT_CELL_SIZE + TTT_CELL_SIZE // 2
@@ -263,8 +294,10 @@ class TicTacToeScene(BaseScene):
 
     def _draw_border(self, screen: pygame.Surface) -> None:
         pygame.draw.rect(
-            screen, COLOR_BORDER,
-            pygame.Rect(15, 15, SCREEN_WIDTH - 30, SCREEN_HEIGHT - 30), 4,
+            screen,
+            COLOR_BORDER,
+            pygame.Rect(15, 15, SCREEN_WIDTH - 30, SCREEN_HEIGHT - 30),
+            4,
         )
 
     def _draw_header(self, screen: pygame.Surface) -> None:
@@ -293,14 +326,20 @@ class TicTacToeScene(BaseScene):
             # vertical
             x = TTT_BOARD_X + i * TTT_CELL_SIZE
             pygame.draw.line(
-                screen, COLOR_TTT_LINE,
-                (x, TTT_BOARD_Y), (x, TTT_BOARD_Y + TTT_BOARD_H), 3
+                screen,
+                COLOR_TTT_LINE,
+                (x, TTT_BOARD_Y),
+                (x, TTT_BOARD_Y + TTT_BOARD_H),
+                3,
             )
             # horizontal
             y = TTT_BOARD_Y + i * TTT_CELL_SIZE
             pygame.draw.line(
-                screen, COLOR_TTT_LINE,
-                (TTT_BOARD_X, y), (TTT_BOARD_X + TTT_BOARD_W, y), 3,
+                screen,
+                COLOR_TTT_LINE,
+                (TTT_BOARD_X, y),
+                (TTT_BOARD_X + TTT_BOARD_W, y),
+                3,
             )
 
         # --- X and O markers ---
@@ -317,20 +356,28 @@ class TicTacToeScene(BaseScene):
 
     def _draw_footer(self, screen: pygame.Surface) -> None:
         pygame.draw.line(
-            screen, COLOR_LINE,
-            (25, SCREEN_HEIGHT - 65), (SCREEN_WIDTH - 28, SCREEN_HEIGHT - 65), 2,
+            screen,
+            COLOR_LINE,
+            (25, SCREEN_HEIGHT - 65),
+            (SCREEN_WIDTH - 28, SCREEN_HEIGHT - 65),
+            2,
         )
         footer_y = SCREEN_HEIGHT - 48
 
         mx, my = pygame.mouse.get_pos()
-        abort_color = COLOR_GREEN if self.abort_rect.collidepoint(mx, my) else COLOR_FOOTER
+        abort_color = (
+            COLOR_GREEN if self.abort_rect.collidepoint(mx, my) else COLOR_FOOTER
+        )
 
         abort = self.fonts["smaller"].render("< ABORT", False, abort_color)
         score = self.fonts["smaller"].render(
             f"SCORE:  P1 {self.player_score} - CPU {self.cpu_score}",
-            False, COLOR_FOOTER,
+            False,
+            COLOR_FOOTER,
         )
-        hint = self.fonts["smaller"].render("CLICK TO PLACE  |  R TO RESET", False, COLOR_FOOTER)
+        hint = self.fonts["smaller"].render(
+            "CLICK TO PLACE  |  R TO RESET", False, COLOR_FOOTER
+        )
 
         screen.blit(abort, (28, footer_y))
         screen.blit(score, (SCREEN_WIDTH - score.get_width() - 28, footer_y))
@@ -352,7 +399,9 @@ class TicTacToeScene(BaseScene):
         color = RESULT_COLORS.get(self.winner, COLOR_TITLE_YELLOW)
         label = RESULT_LABELS.get(self.winner, "RESULT")
         result_surf = self.fonts["small"].render(label, False, color)
-        screen.blit(result_surf, ((SCREEN_WIDTH - result_surf.get_width()) // 2, oy + 30))
+        screen.blit(
+            result_surf, ((SCREEN_WIDTH - result_surf.get_width()) // 2, oy + 30)
+        )
 
         self.reset_btn_rect = pygame.Rect(ox + 60, oy + 110, 380, 50)
         mx, my = pygame.mouse.get_pos()
@@ -360,5 +409,7 @@ class TicTacToeScene(BaseScene):
         btn_color = COLOR_RED_ORANGE if hover else COLOR_TITLE_YELLOW
 
         pygame.draw.rect(screen, btn_color, self.reset_btn_rect, 3)
-        btn_text = self.fonts["smaller"].render("PRESS ENTER TO PLAY AGAIN", False, btn_color)
+        btn_text = self.fonts["smaller"].render(
+            "PRESS ENTER TO PLAY AGAIN", False, btn_color
+        )
         screen.blit(btn_text, ((SCREEN_WIDTH - btn_text.get_width()) // 2, oy + 125))
