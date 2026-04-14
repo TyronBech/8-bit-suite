@@ -128,10 +128,14 @@ class TestGetCpuMove:
         assert (
             get_cpu_move(b, difficulty=1.0) == 8
         )  # completes O's bottom row (-1,-1,_)
+        assert (
+            get_cpu_move(b, difficulty=1.0) == 8
+        )  # completes O's bottom row (-1,-1,_)
 
     def test_cpu_blocks_player_win(self):
         # X will win at index 2 unless CPU blocks
         b = board(1, 1, 0, -1, -1, 0, 0, 0, 0)
+        assert get_cpu_move(b, difficulty=1.0) == 2
         assert get_cpu_move(b, difficulty=1.0) == 2
 
     def test_does_not_mutate_board(self):
@@ -176,11 +180,19 @@ class TestPlayerMove:
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
+        scene.handle_events(
+            [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
+        )
         assert scene.board[0] == 1
 
     def test_click_occupied_cell_does_nothing(self, scene):
         scene.board[0] = -1  # already occupied
+        scene.board[0] = -1  # already occupied
         cx, cy = scene._cell_center(0)
+        scene.handle_events(
+            [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
+        )
+        assert scene.board[0] == -1  # unchanged
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
@@ -188,6 +200,9 @@ class TestPlayerMove:
 
     def test_player_click_switches_turn_to_cpu(self, scene):
         cx, cy = scene._cell_center(4)
+        scene.handle_events(
+            [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
+        )
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
@@ -205,11 +220,13 @@ class TestCpuMove:
         scene.update(0.7)
         empty_after = np.sum(scene.board == 0)
         assert empty_after == 7  # one more cell filled by CPU
+        assert empty_after == 7  # one more cell filled by CPU
 
     def test_cpu_does_not_move_before_delay(self, scene):
         scene.board[0] = 1
         scene.current_turn = "O"
         scene.update(0.3)
+        assert np.sum(scene.board == 0) == 8  # nothing placed yet
         assert np.sum(scene.board == 0) == 8  # nothing placed yet
 
 
@@ -224,12 +241,18 @@ class TestWinDetection:
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
+        scene.handle_events(
+            [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
+        )
         assert scene.phase == "result"
         assert scene.winner == "X"
 
     def test_player_win_increments_score(self, scene):
         scene.board = board(1, 1, 0, -1, -1, 0, 0, 0, 0)
         cx, cy = scene._cell_center(2)
+        scene.handle_events(
+            [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
+        )
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
@@ -240,6 +263,7 @@ class TestWinDetection:
         # Force CPU to win immediately
         scene.board = board(1, 1, 0, -1, -1, 0, 0, 0, 0)
         scene.current_turn = "O"
+        scene._place_move(5, -1)  # O completes middle row
         scene._place_move(5, -1)  # O completes middle row
         assert scene.cpu_score == 1
 
