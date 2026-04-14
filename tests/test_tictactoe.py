@@ -50,8 +50,6 @@ def fonts():
     font = pygame.font.SysFont(None, 16)
     return {k: font for k in ("title", "small", "smaller", "tiny", "menu")}
 
-
-<<<<<<< feat/snake-and-apple
 @pytest.fixture
 def scene(manager, fonts, monkeypatch):
     monkeypatch.setattr(
@@ -62,11 +60,6 @@ def scene(manager, fonts, monkeypatch):
         },
     )
     return TicTacToeScene(manager, fonts)
-=======
-# @pytest.fixture
-# def scene(manager, fonts):
-#     return TicTacToeScene(manager, fonts)
->>>>>>> develop
 
 
 def board(*values) -> np.ndarray:
