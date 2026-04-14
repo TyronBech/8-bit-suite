@@ -17,7 +17,7 @@ from scenes.tictactoe import (
     check_winner,
     minimax,
     get_cpu_move,
-    #TicTacToeScene,
+    TicTacToeScene,
 )
 
 # ------------------------------------------------------------------ fixtures
