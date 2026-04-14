@@ -44,12 +44,27 @@ WINNING_LINES = np.array(
 def load_ttt_images() -> dict[int, pygame.Surface]:
     """Load and scale the custom X/O marker art for the board."""
     marker_size = TTT_CELL_SIZE - 24
+<<<<<<< feat/snake-and-apple
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    image_paths = {
+        1: os.path.join(base_dir, "assets", "images", "X.png"),
+        -1: os.path.join(base_dir, "assets", "images", "O.png"),
+    }
+    marker_images: dict[int, pygame.Surface] = {}
+    display_surface = None
+    if pygame.display.get_init():
+        try:
+            display_surface = pygame.display.get_surface()
+        except pygame.error:
+            display_surface = None
+=======
     image_paths = {
         1: os.path.join("assets", "images", "X.png"),
         -1: os.path.join("assets", "images", "O.png"),
     }
     marker_images: dict[int, pygame.Surface] = {}
     display_surface = pygame.display.get_surface()
+>>>>>>> develop
 
     for value, path in image_paths.items():
         try:

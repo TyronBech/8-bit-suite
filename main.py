@@ -4,6 +4,7 @@ from core.scene_manager import SceneManager
 from scenes.menu import MenuScene, LoadingScene
 from scenes.rps import RPSScene
 from scenes.tictactoe import TicTacToeScene
+from scenes.snake import SnakeScene
 
 
 def main():
@@ -24,6 +25,7 @@ def main():
     manager.register("menu", MenuScene(manager, fonts))
     manager.register("rps", RPSScene(manager, fonts))
     manager.register("tictactoe", TicTacToeScene(manager, fonts))
+    manager.register("snake", SnakeScene(manager, fonts))
 
     manager.switch_to("menu")
     manager.run()

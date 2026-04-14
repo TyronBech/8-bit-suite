@@ -98,3 +98,23 @@ TTT_BOARD_Y = 140
 COLOR_TTT_LINE = (60, 80, 100)
 COLOR_TTT_X = (220, 60, 60)
 COLOR_TTT_O = (40, 180, 220)
+
+# --- Snake Layout ---
+SNAKE_COLS = 25  # number of grid columns
+SNAKE_ROWS = 25  # number of grid rows
+SNAKE_CELL = 18  # pixels per cell
+SNAKE_BOARD_W = SNAKE_COLS * SNAKE_CELL  # 450px
+SNAKE_BOARD_H = SNAKE_ROWS * SNAKE_CELL  # 450px
+SNAKE_BOARD_X = (SCREEN_WIDTH - SNAKE_BOARD_W) // 2
+SNAKE_BOARD_Y = 155
+
+# --- Snake Speed ---
+SNAKE_BASE_SPEED = 8.0  # moves per second at score 0
+SNAKE_SPEED_STEP = 0.5  # added per 10 score points
+
+# --- Snake Colors ---
+COLOR_SNAKE_HEAD = (52, 220, 100)
+COLOR_SNAKE_BODY = (38, 160, 75)
+COLOR_APPLE = (220, 60, 60)
+COLOR_BOARD_BG = (10, 16, 22)
+COLOR_BOARD_BORDER = (40, 80, 100)
