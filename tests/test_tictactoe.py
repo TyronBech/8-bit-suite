@@ -17,8 +17,7 @@ from scenes.tictactoe import (
     check_winner,
     minimax,
     get_cpu_move,
-    # TicTacToeScene,
-    # TicTacToeScene,
+    TicTacToeScene,
 )
 
 # ------------------------------------------------------------------ fixtures
@@ -124,7 +123,6 @@ class TestGetCpuMove:
         assert get_cpu_move(b) == 4
 
     def test_cpu_takes_winning_move(self):
-        # O can win at index 2
         # O can win at index 2
         b = board(0, 0, 0, 1, 1, 0, -1, -1, 0)
         assert (
