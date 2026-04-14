@@ -44,18 +44,12 @@ WINNING_LINES = np.array(
 def load_ttt_images() -> dict[int, pygame.Surface]:
     """Load and scale the custom X/O marker art for the board."""
     marker_size = TTT_CELL_SIZE - 24
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     image_paths = {
-        1: os.path.join(base_dir, "assets", "images", "X.png"),
-        -1: os.path.join(base_dir, "assets", "images", "O.png"),
+        1: os.path.join("assets", "images", "X.png"),
+        -1: os.path.join("assets", "images", "O.png"),
     }
     marker_images: dict[int, pygame.Surface] = {}
-    display_surface = None
-    if pygame.display.get_init():
-        try:
-            display_surface = pygame.display.get_surface()
-        except pygame.error:
-            display_surface = None
+    display_surface = pygame.display.get_surface()
 
     for value, path in image_paths.items():
         try:
@@ -68,20 +62,6 @@ def load_ttt_images() -> dict[int, pygame.Surface]:
         marker_images[value] = pygame.transform.scale(image, (marker_size, marker_size))
     return marker_images
 
-
-
-def load_ttt_images() -> dict[int, pygame.Surface]:
-    """Load and scale the custom X/O marker art for the board."""
-    marker_size = TTT_CELL_SIZE - 24
-    image_paths = {
-        1: os.path.join("assets", "images", "X.png"),
-        -1: os.path.join("assets", "images", "O.png"),
-    }
-    marker_images = {}
-    for value, path in image_paths.items():
-        image = pygame.image.load(path).convert_alpha()
-        marker_images[value] = pygame.transform.scale(image, (marker_size, marker_size))
-    return marker_images
 
 def check_winner(board: np.ndarray) -> str | None:
     """
