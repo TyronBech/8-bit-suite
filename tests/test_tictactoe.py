@@ -51,7 +51,6 @@ def fonts():
     font = pygame.font.SysFont(None, 16)
     return {k: font for k in ("title", "small", "smaller", "tiny", "menu")}
 
-
 @pytest.fixture
 def scene(manager, fonts, monkeypatch):
     monkeypatch.setattr(
