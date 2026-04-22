@@ -16,7 +16,6 @@ import pygame
 
 from scenes.rps import CHOICES, get_winner, RPSScene
 
-
 # ──────────────────────────────────────────────────────────────
 # Fixtures
 # ──────────────────────────────────────────────────────────────
@@ -53,11 +52,11 @@ def fonts():
     """Tiny real fonts — small enough to be fast, real enough to not crash."""
     font = pygame.font.SysFont(None, 16)
     return {
-        "title":   font,
-        "small":   font,
+        "title": font,
+        "small": font,
         "smaller": font,
-        "tiny":    font,
-        "menu":    font,
+        "tiny": font,
+        "menu": font,
     }
 
 
@@ -189,12 +188,12 @@ class TestChoiceCycling:
         assert scene.player_index == 0
 
     def test_right_wraps_from_last_to_first(self, scene):
-        scene.player_index = len(CHOICES) - 1   # SCISSORS
+        scene.player_index = len(CHOICES) - 1  # SCISSORS
         scene.handle_events([make_keydown(pygame.K_RIGHT)])
-        assert scene.player_index == 0           # wraps to ROCK
+        assert scene.player_index == 0  # wraps to ROCK
 
     def test_left_wraps_from_first_to_last(self, scene):
-        scene.player_index = 0                   # ROCK
+        scene.player_index = 0  # ROCK
         scene.handle_events([make_keydown(pygame.K_LEFT)])
         assert scene.player_index == len(CHOICES) - 1  # wraps to SCISSORS
 
@@ -210,7 +209,7 @@ class TestChoiceCycling:
 
 class TestConfirmChoice:
     def test_enter_sets_player_choice(self, scene):
-        scene.player_index = 0   # ROCK
+        scene.player_index = 0  # ROCK
         scene.handle_events([make_keydown(pygame.K_RETURN)])
         assert scene.player_choice == "ROCK"
 
@@ -261,7 +260,7 @@ class TestScoreTracking:
         # Round 1
         scene.handle_events([make_keydown(pygame.K_RETURN)])
         scene.phase = "result"
-        scene.handle_events([make_keydown(pygame.K_RETURN)])   # reset round
+        scene.handle_events([make_keydown(pygame.K_RETURN)])  # reset round
         # Round 2
         scene.handle_events([make_keydown(pygame.K_RETURN)])
         assert scene.player_score == 2
@@ -306,12 +305,12 @@ class TestRevealingPhaseBlocksInput:
         scene.phase = "revealing"
         scene.player_index = 0
         scene.handle_events([make_keydown(pygame.K_RIGHT)])
-        assert scene.player_index == 0   # unchanged
+        assert scene.player_index == 0  # unchanged
 
     def test_enter_ignored_during_revealing(self, scene):
         scene.phase = "revealing"
         scene.handle_events([make_keydown(pygame.K_RETURN)])
-        assert scene.phase == "revealing"   # still revealing
+        assert scene.phase == "revealing"  # still revealing
 
 
 # ──────────────────────────────────────────────────────────────
@@ -339,7 +338,7 @@ class TestResultPhase:
     def test_enter_preserves_scores_on_reset(self, scene):
         self._put_in_result(scene)
         scene.handle_events([make_keydown(pygame.K_RETURN)])
-        assert scene.player_score == 1   # score kept
+        assert scene.player_score == 1  # score kept
 
     def test_escape_switches_to_menu_from_result(self, scene, manager):
         self._put_in_result(scene)

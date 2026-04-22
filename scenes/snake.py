@@ -29,6 +29,7 @@ from core.settings import (
     COLOR_APPLE,
     COLOR_BOARD_BG,
     COLOR_BOARD_BORDER,
+    COLOR_SPRING_GREEN,
 )
 
 
@@ -61,6 +62,7 @@ class SnakeScene(BaseScene):
         self.move_timer = 0.0
         self.apple = self._spawn_apple()
         self.abort_rect = pygame.Rect(SCREEN_WIDTH - 148, SCREEN_HEIGHT - 52, 120, 30)
+        self.reset_btn_rect: pygame.Rect | None = None
 
     def _spawn_apple(self) -> tuple[int, int] | None:
         """Return a random (col, row) for the apple that is not on the snake, or None if full."""
@@ -103,6 +105,10 @@ class SnakeScene(BaseScene):
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.abort_rect.collidepoint(event.pos):
                     self.manager.switch_to("menu")
+                elif self.reset_btn_rect and self.reset_btn_rect.collidepoint(
+                    event.pos
+                ):
+                    self._reset_round()
 
     def update(self, dt: float) -> None:
         if self.phase != "playing":
@@ -222,23 +228,24 @@ class SnakeScene(BaseScene):
     def _draw_game_over(self, screen) -> None:
         overlay = pygame.Surface((500, 220), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
-        ox = (SCREEN_WIDTH - 500) // 2
-        oy = (SCREEN_HEIGHT - 220) // 2
+        ox = (SCREEN_WIDTH - overlay.get_width()) // 2
+        oy = (SCREEN_HEIGHT - overlay.get_height()) // 2
         screen.blit(overlay, (ox, oy))
 
         # Red border (like the screenshot)
-        pygame.draw.rect(screen, COLOR_RED_ORANGE, pygame.Rect(ox, oy, 500, 220), 3)
+        pygame.draw.rect(screen, COLOR_TITLE_YELLOW, pygame.Rect(ox, oy, 500, 220), 3)
 
         go = self.fonts["small"].render("GAME OVER", False, COLOR_RED_ORANGE)
         screen.blit(go, (ox + (500 - go.get_width()) // 2, oy + 30))
         fs = self.fonts["smaller"].render(
-            f"FINAL SCORE: {self.score}", False, COLOR_FOOTER
+            f"FINAL SCORE: {self.score}", False, COLOR_SPRING_GREEN
         )
+
         screen.blit(fs, (ox + (500 - fs.get_width()) // 2, oy + 90))
-        btn = self.fonts["smaller"].render(
-            "PRESS ENTER TO PLAY AGAIN", False, COLOR_TITLE_YELLOW
-        )
-        pygame.draw.rect(
-            screen, COLOR_TITLE_YELLOW, pygame.Rect(ox + 100, oy + 145, 300, 44), 2
-        )
-        screen.blit(btn, (ox + (500 - btn.get_width()) // 2, oy + 158))
+        self.reset_btn_rect = pygame.Rect(ox + 45, oy + 143, 380 + 30, 44)
+        mx, my = pygame.mouse.get_pos()
+        hover = self.reset_btn_rect.collidepoint(mx, my)
+        btn_color = COLOR_RED_ORANGE if hover else COLOR_TITLE_YELLOW
+        pygame.draw.rect(screen, btn_color, self.reset_btn_rect, 2)
+        btn_text = self.fonts["smaller"].render("PRESS TO PLAY AGAIN", False, btn_color)
+        screen.blit(btn_text, (ox + (500 - btn_text.get_width()) // 2, oy + 158))

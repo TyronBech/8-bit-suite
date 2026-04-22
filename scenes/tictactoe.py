@@ -249,6 +249,10 @@ class TicTacToeScene(BaseScene):
             value: 1 for player (X), -1 for CPU (O).
         """
 
+        # Ignore invalid or stale move attempts (e.g., after game over).
+        if self.phase != "playing" or not (0 <= cell < 9) or self.board[cell] != 0:
+            return
+
         self.board[cell] = value
         result = check_winner(self.board)
 
