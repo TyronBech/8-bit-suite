@@ -216,16 +216,18 @@ class TestCpuMove:
         scene.update(0.7)
         empty_after = np.sum(scene.board == 0)
         assert empty_after == 7  # one more cell filled by CPU
-        assert empty_after == 7  # one more cell filled by CPU
+
+        scene.update(0.7)
+        assert np.sum(scene.board == 0) == 7  # no extra CPU move on a later tick
 
     def test_cpu_does_not_move_before_delay(self, scene):
         scene.board[0] = 1
         scene.current_turn = "O"
         scene.update(0.3)
         assert np.sum(scene.board == 0) == 8  # nothing placed yet
-        assert np.sum(scene.board == 0) == 8  # nothing placed yet
 
-
+        scene.update(0.3)
+        assert np.sum(scene.board == 0) == 7  # CPU moves once total delay is reached
 # ------------------------------------------------------------------ win / draw detection
 
 
