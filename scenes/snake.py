@@ -39,6 +39,8 @@ class SnakeScene(BaseScene):
     def __init__(self, manager: Any, fonts: dict[str, pygame.font.Font]) -> None:
         super().__init__(manager)
         self.fonts = fonts
+        self._cell_surface_cache: dict[tuple[int,
+                                             int, int, int], pygame.Surface] = {}
         self._reset_game()
 
     def on_exit(self) -> None:
@@ -56,7 +58,8 @@ class SnakeScene(BaseScene):
 
         self.snake = [(mid_c, mid_r), (mid_c - 1, mid_r), (mid_c - 2, mid_r)]
         self.direction = (1, 0)  # (dx, dy)
-        self.next_dir = (1, 0)  # buffer the next direction to prevent reversing
+        # buffer the next direction to prevent reversing
+        self.next_dir = (1, 0)
         self.score = 0
         self.phase = "playing"  # "playing" or "dead"
         self.move_timer = 0.0
@@ -184,7 +187,8 @@ class SnakeScene(BaseScene):
         online = self.fonts["tiny"].render("ONLINE", False, COLOR_ONLINE)
         screen.blit(online, (SCREEN_WIDTH - online.get_width() - 30, 32))
 
-        pygame.draw.line(screen, COLOR_LINE, (25, 55), (SCREEN_WIDTH - 28, 55), 2)
+        pygame.draw.line(screen, COLOR_LINE, (25, 55),
+                         (SCREEN_WIDTH - 28, 55), 2)
 
         title = self.fonts["small"].render("SNAKE", False, COLOR_TITLE_YELLOW)
         screen.blit(title, ((SCREEN_WIDTH - title.get_width()) // 2, 80))
@@ -204,7 +208,8 @@ class SnakeScene(BaseScene):
         n_body = len(body)
         for i, seg in enumerate(reversed(body)):
             # lowest opacity at tail (i=0), highest at neck
-            fraction = 0.4 + 0.6 * (i / max(1, n_body - 1)) if n_body > 1 else 1.0
+            fraction = 0.4 + 0.6 * \
+                (i / max(1, n_body - 1)) if n_body > 1 else 1.0
             alpha = int(255 * fraction)
             color = (*COLOR_SNAKE_BODY[:3], alpha)
             self._draw_cell(screen, seg, color)
@@ -223,7 +228,8 @@ class SnakeScene(BaseScene):
 
         mx, my = pygame.mouse.get_pos()
         abort_color = (
-            COLOR_GREEN if self.abort_rect.collidepoint(mx, my) else COLOR_FOOTER
+            COLOR_GREEN if self.abort_rect.collidepoint(
+                mx, my) else COLOR_FOOTER
         )
 
         abort = self.fonts["smaller"].render("< ABORT", False, abort_color)
@@ -242,8 +248,12 @@ class SnakeScene(BaseScene):
         y = SNAKE_BOARD_Y + r * SNAKE_CELL + 1
         rect = pygame.Rect(x, y, SNAKE_CELL - 2, SNAKE_CELL - 2)
         if len(color) == 4:
-            s = pygame.Surface(rect.size, pygame.SRCALPHA)
-            pygame.draw.rect(s, color, s.get_rect(), border_radius=3)
+            rgba = tuple(color)
+            s = self._cell_surface_cache.get(rgba)
+            if s is None:
+                s = pygame.Surface(rect.size, pygame.SRCALPHA)
+                pygame.draw.rect(s, rgba, s.get_rect(), border_radius=3)
+                self._cell_surface_cache[rgba] = s
             screen.blit(s, rect.topleft)
         else:
             pygame.draw.rect(screen, color, rect, border_radius=3)
@@ -256,7 +266,8 @@ class SnakeScene(BaseScene):
         screen.blit(overlay, (ox, oy))
 
         # Yellow border (like the screenshot)
-        pygame.draw.rect(screen, COLOR_TITLE_YELLOW, pygame.Rect(ox, oy, 500, 220), 3)
+        pygame.draw.rect(screen, COLOR_TITLE_YELLOW,
+                         pygame.Rect(ox, oy, 500, 220), 3)
 
         go = self.fonts["small"].render("GAME OVER", False, COLOR_RED_ORANGE)
         screen.blit(go, (ox + (500 - go.get_width()) // 2, oy + 30))
@@ -270,5 +281,7 @@ class SnakeScene(BaseScene):
         hover = self.reset_btn_rect.collidepoint(mx, my)
         btn_color = COLOR_RED_ORANGE if hover else COLOR_TITLE_YELLOW
         pygame.draw.rect(screen, btn_color, self.reset_btn_rect, 2)
-        btn_text = self.fonts["smaller"].render("PRESS TO PLAY AGAIN", False, btn_color)
-        screen.blit(btn_text, (ox + (500 - btn_text.get_width()) // 2, oy + 158))
+        btn_text = self.fonts["smaller"].render(
+            "PRESS TO PLAY AGAIN", False, btn_color)
+        screen.blit(
+            btn_text, (ox + (500 - btn_text.get_width()) // 2, oy + 158))

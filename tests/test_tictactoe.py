@@ -177,10 +177,14 @@ class TestPlayerMove:
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
+        board_after_first = scene.board.copy()
+        turn_after_first = scene.current_turn
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
         assert scene.board[0] == 1
+        assert np.array_equal(scene.board, board_after_first)
+        assert scene.current_turn == turn_after_first
 
     def test_click_occupied_cell_does_nothing(self, scene):
         scene.board[0] = -1  # already occupied
@@ -199,10 +203,14 @@ class TestPlayerMove:
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
+        board_after_first = scene.board.copy()
+        turn_after_first = scene.current_turn
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
         assert scene.current_turn == "O"
+        assert np.array_equal(scene.board, board_after_first)
+        assert scene.current_turn == turn_after_first
 
 
 # ------------------------------------------------------------------ CPU move
@@ -218,7 +226,8 @@ class TestCpuMove:
         assert empty_after == 7  # one more cell filled by CPU
 
         scene.update(0.7)
-        assert np.sum(scene.board == 0) == 7  # no extra CPU move on a later tick
+        # no extra CPU move on a later tick
+        assert np.sum(scene.board == 0) == 7
 
     def test_cpu_does_not_move_before_delay(self, scene):
         scene.board[0] = 1
@@ -227,7 +236,8 @@ class TestCpuMove:
         assert np.sum(scene.board == 0) == 8  # nothing placed yet
 
         scene.update(0.3)
-        assert np.sum(scene.board == 0) == 7  # CPU moves once total delay is reached
+        # CPU moves once total delay is reached
+        assert np.sum(scene.board == 0) == 7
 # ------------------------------------------------------------------ win / draw detection
 
 
@@ -239,11 +249,17 @@ class TestWinDetection:
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
+        board_after_first = scene.board.copy()
+        phase_after_first = scene.phase
+        winner_after_first = scene.winner
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
         assert scene.phase == "result"
         assert scene.winner == "X"
+        assert np.array_equal(scene.board, board_after_first)
+        assert scene.phase == phase_after_first
+        assert scene.winner == winner_after_first
 
     def test_player_win_increments_score(self, scene):
         scene.board = board(1, 1, 0, -1, -1, 0, 0, 0, 0)
@@ -251,11 +267,21 @@ class TestWinDetection:
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
+        board_after_first = scene.board.copy()
+        player_score_after_first = scene.player_score
+        cpu_score_after_first = scene.cpu_score
+        phase_after_first = scene.phase
+        winner_after_first = scene.winner
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
         )
         assert scene.player_score == 1
         assert scene.cpu_score == 0
+        assert np.array_equal(scene.board, board_after_first)
+        assert scene.player_score == player_score_after_first
+        assert scene.cpu_score == cpu_score_after_first
+        assert scene.phase == phase_after_first
+        assert scene.winner == winner_after_first
 
     def test_cpu_win_increments_cpu_score(self, scene):
         # Force CPU to win immediately
@@ -280,6 +306,7 @@ class TestWinDetection:
         assert scene.phase == phase_after_win
         assert scene.winner == winner_after_win
         assert scene.current_turn == current_turn_after_win
+
     def test_draw_sets_winner_to_draw(self, scene):
         # One move away from a draw — no winner possible
         scene.board = board(1, -1, 1, 1, -1, -1, -1, 1, 0)
