@@ -64,8 +64,11 @@ class TestSpawnApple:
 
     def test_spawn_apple_returns_none_when_full(self, scene):
         """When the snake fills the entire grid, _spawn_apple returns None."""
-        scene.snake = [(c, r) for r in range(SNAKE_ROWS)
-                       for c in range(SNAKE_COLS)]
+        scene.snake = [
+            (c, r)
+            for r in range(SNAKE_ROWS)
+            for c in range(SNAKE_COLS)
+        ]
         assert scene._spawn_apple() is None
 
     def test_spawn_apple_is_inside_board(self, scene):
