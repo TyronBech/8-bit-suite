@@ -184,7 +184,6 @@ class TestPlayerMove:
 
     def test_click_occupied_cell_does_nothing(self, scene):
         scene.board[0] = -1  # already occupied
-        scene.board[0] = -1  # already occupied
         cx, cy = scene._cell_center(0)
         scene.handle_events(
             [pygame.event.Event(pygame.MOUSEBUTTONUP, pos=(cx, cy), button=1)]
