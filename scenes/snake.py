@@ -61,7 +61,7 @@ class SnakeScene(BaseScene):
         self.phase = "playing"  # "playing" or "dead"
         self.move_timer = 0.0
         self.apple = self._spawn_apple()
-        self.abort_rect = pygame.Rect(SCREEN_WIDTH - 148, SCREEN_HEIGHT - 52, 120, 30)
+        self.abort_rect = pygame.Rect(28, SCREEN_HEIGHT - 52, 120, 30)
         self.reset_btn_rect: pygame.Rect | None = None
 
     def _spawn_apple(self) -> tuple[int, int] | None:
@@ -200,30 +200,53 @@ class SnakeScene(BaseScene):
         if self.apple is not None:
             self._draw_cell(screen, self.apple, COLOR_APPLE)
         # Snake body (reversed so head draws last / on top)
-        for seg in reversed(self.snake[1:]):
-            self._draw_cell(screen, seg, COLOR_SNAKE_BODY)
+        body = self.snake[1:]
+        n_body = len(body)
+        for i, seg in enumerate(reversed(body)):
+            # lowest opacity at tail (i=0), highest at neck
+            fraction = 0.4 + 0.6 * (i / max(1, n_body - 1)) if n_body > 1 else 1.0
+            alpha = int(255 * fraction)
+            color = (*COLOR_SNAKE_BODY[:3], alpha)
+            self._draw_cell(screen, seg, color)
         self._draw_cell(screen, self.snake[0], COLOR_SNAKE_HEAD)
 
     def _draw_footer(self, screen: pygame.Surface) -> None:
-        score_text = self.fonts["tiny"].render(
-            f"SCORE: {self.score}   HI-SCORE: {self.hi_score}", False, COLOR_FOOTER
+        pygame.draw.line(
+            screen,
+            COLOR_LINE,
+            (25, SCREEN_HEIGHT - 65),
+            (SCREEN_WIDTH - 28, SCREEN_HEIGHT - 65),
+            2,
         )
-        screen.blit(score_text, (28, SCREEN_HEIGHT - 52))
+
+        footer_y = SCREEN_HEIGHT - 48
 
         mx, my = pygame.mouse.get_pos()
         abort_color = (
             COLOR_GREEN if self.abort_rect.collidepoint(mx, my) else COLOR_FOOTER
         )
-        abort_label = self.fonts["tiny"].render("< ABORT", False, abort_color)
-        screen.blit(abort_label, (SCREEN_WIDTH - 148, SCREEN_HEIGHT - 52))
+
+        abort = self.fonts["smaller"].render("< ABORT", False, abort_color)
+        score = self.fonts["smaller"].render(
+            f"SCORE:  {self.score} | {self.hi_score}",
+            False,
+            COLOR_FOOTER,
+        )
+
+        screen.blit(abort, (28, footer_y))
+        screen.blit(score, (SCREEN_WIDTH - score.get_width() - 36, footer_y))
 
     def _draw_cell(self, screen, cell, color) -> None:
         c, r = cell
         x = SNAKE_BOARD_X + c * SNAKE_CELL + 1
         y = SNAKE_BOARD_Y + r * SNAKE_CELL + 1
-        pygame.draw.rect(
-            screen, color, pygame.Rect(x, y, SNAKE_CELL - 2, SNAKE_CELL - 2)
-        )
+        rect = pygame.Rect(x, y, SNAKE_CELL - 2, SNAKE_CELL - 2)
+        if len(color) == 4:
+            s = pygame.Surface(rect.size, pygame.SRCALPHA)
+            pygame.draw.rect(s, color, s.get_rect(), border_radius=3)
+            screen.blit(s, rect.topleft)
+        else:
+            pygame.draw.rect(screen, color, rect, border_radius=3)
 
     def _draw_game_over(self, screen) -> None:
         overlay = pygame.Surface((500, 220), pygame.SRCALPHA)
