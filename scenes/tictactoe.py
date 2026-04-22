@@ -250,7 +250,11 @@ class TicTacToeScene(BaseScene):
         """
 
         # Ignore invalid or stale move attempts (e.g., after game over).
-        if self.phase != "playing" or not (0 <= cell < 9) or self.board[cell] != 0:
+        is_playing = self.phase == "playing"
+        in_bounds = 0 <= cell < 9
+        cell_empty = in_bounds and self.board[cell] == 0
+
+        if not is_playing or not cell_empty:
             return
 
         self.board[cell] = value
