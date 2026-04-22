@@ -255,7 +255,7 @@ class SnakeScene(BaseScene):
         oy = (SCREEN_HEIGHT - overlay.get_height()) // 2
         screen.blit(overlay, (ox, oy))
 
-        # Red border (like the screenshot)
+        # Yellow border (like the screenshot)
         pygame.draw.rect(screen, COLOR_TITLE_YELLOW, pygame.Rect(ox, oy, 500, 220), 3)
 
         go = self.fonts["small"].render("GAME OVER", False, COLOR_RED_ORANGE)
