@@ -265,9 +265,24 @@ class TestWinDetection:
         scene.board = board(1, 1, 0, -1, -1, 0, 0, 0, 0)
         scene.current_turn = "O"
         scene._place_move(5, -1)  # O completes middle row
-        scene._place_move(5, -1)  # O completes middle row
+
         assert scene.cpu_score == 1
 
+        board_after_win = scene.board.copy()
+        player_score_after_win = scene.player_score
+        cpu_score_after_win = scene.cpu_score
+        phase_after_win = scene.phase
+        winner_after_win = scene.winner
+        current_turn_after_win = scene.current_turn
+
+        scene._place_move(5, -1)  # Stale move attempt should be ignored
+
+        assert np.array_equal(scene.board, board_after_win)
+        assert scene.player_score == player_score_after_win
+        assert scene.cpu_score == cpu_score_after_win
+        assert scene.phase == phase_after_win
+        assert scene.winner == winner_after_win
+        assert scene.current_turn == current_turn_after_win
     def test_draw_sets_winner_to_draw(self, scene):
         # One move away from a draw — no winner possible
         scene.board = board(1, -1, 1, 1, -1, -1, -1, 1, 0)
