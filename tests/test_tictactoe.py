@@ -129,14 +129,10 @@ class TestGetCpuMove:
         assert (
             get_cpu_move(b, difficulty=1.0) == 8
         )  # completes O's bottom row (-1,-1,_)
-        assert (
-            get_cpu_move(b, difficulty=1.0) == 8
-        )  # completes O's bottom row (-1,-1,_)
 
     def test_cpu_blocks_player_win(self):
         # X will win at index 2 unless CPU blocks
         b = board(1, 1, 0, -1, -1, 0, 0, 0, 0)
-        assert get_cpu_move(b, difficulty=1.0) == 2
         assert get_cpu_move(b, difficulty=1.0) == 2
 
     def test_does_not_mutate_board(self):
